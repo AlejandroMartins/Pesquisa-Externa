@@ -1,11 +1,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include "arvBin.h"
 
 #define FILENAME "arvore_binaria.dat"
 
 // Estrutura do nó da árvore
-typedef struct no_arv{
+struct no_arv{
     int chave;
     long int esquerda;  
     long int direita;
@@ -87,11 +88,11 @@ bool buscar(FILE* arquivo, int chave, long pos_atual, No_arv* no) {
     } 
     else if (chave < atual->chave) 
     {
-        encontrado = buscar(arquivo, chave, atual->esquerda);
+        encontrado = buscar(arquivo, chave, atual->esquerda, no);
     } 
     else 
     {
-        encontrado = buscar(arquivo, chave, atual->direita);
+        encontrado = buscar(arquivo, chave, atual->direita, no);
     }
     
     free(atual);

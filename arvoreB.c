@@ -169,3 +169,156 @@ void insere(Item_arq reg, Pagina* arvore){
 
 	}
 }
+
+void reconstitui(Pagina* pag_atual, Pagina* pag_pai, int posic_pai, int* diminui){
+	Pagina* pag_aux = NULL;
+	long int disp_aux, j;
+
+	if(posic_pai < pag_pai->n)
+	{
+		pag_aux = pag_pai->apontador[posic_pai + 1];
+		disp_aux = (pag_aux->n - ORDEM + 1) / 2;
+		pag_atual->registro[pag_atual->n] = pag_pai->registro[posic_pai];
+		pag_atual->apontador[pag_atual->n + 1] = pag_aux->apontador[0];
+		pag_atual->n = pag_atual->n + 1;
+
+		if(disp_aux > 0) // existe folga, transfere de pag_aux para pag_atual
+		{
+			for(j = 1; j < disp_aux; j++)
+				insere_na_pagina(pag_atual, pag_aux->registro[j - 1], pag_aux->apontador[j]); // transferindo de pag_aux para pag_atual
+			pag_pai->registro[posic_pai] = pag_aux->registro[disp_aux - 1];
+			pag_aux->n = pag_aux->n - disp_aux;
+
+			for(j = 0; j < pag_aux->n; j++)
+				pag_aux->registro[j] = pag_aux->registro[j + disp_aux];
+
+			for(j = 0; j <= pag_aux->n; j++)
+				pag_aux->apontador[j] = pag_aux->apontador[j + disp_aux];
+
+			*diminui = 0;
+		}
+		else // junta pag_aux com pag_atual
+		{
+			for(j = 1; j <= ORDEM; j++)
+				insere_na_pagina(pag_atual, pag_aux->registro[j - 1], pag_aux->apontador[j]);
+			free(pag_aux);
+
+			for(j = posic_pai + 1; j < pag_pai->n; j++)
+			{
+				pag_pai->registro[j - 1] = pag_pai->registro[j];
+				pag_pai->apontador[j] = pag_pai->apontador[j + 1];
+			}
+
+			pag_pai->n = pag_pai->n - 1;
+			if(pag_pai->n >= ORDEM)
+				*diminui = 0;
+		}
+	}
+	else
+	{
+		pag_aux = pag_pai->apontador[posic_pai - 1];
+		disp_aux = (pag_aux->n - ORDEM + 1) / 2;
+
+		for(j = pag_atual->n; j >= 1; j--)
+			pag_atual->registro[j] = pag_atual->registro[j - 1];
+		pag_atual->registro[0] = pag_pai->registro[posic_pai - 1];
+
+		for(j = pag_atual->n; j >= 0; j--)
+			pag_atual->n = pag_atual->n + 1;
+
+		if(disp_aux > 0) // existe folga, transfere de pag_aux para pag_atual
+		{
+			for(j = 1; j < disp_aux; j++)
+				insere_na_pagina(pag_atual, pag_aux->registro[pag_aux->n - j], pag_aux->apontador[pag_aux->n - j + 1]);
+
+			pag_atual->apontador[0] = pag_aux->apontador[pag_aux->n - disp_aux + 1];
+			pag_pai->registro[posic_pai - 1] = pag_aux->registro[pag_aux->n - disp_aux];
+			pag_aux->n = pag_aux->n - disp_aux;
+			*diminui = 0;
+		}
+		else // junta pag_atual com pag_aux
+		{
+			for(j = 1; j <= ORDEM; j++)
+				insere_na_pagina(pag_aux, pag_atual->registro[j - 1], pag_atual->apontador[j]);
+			free(pag_atual);
+			pag_pai->n = pag_pai->n - 1;
+
+			if(pag_pai->n >= ORDEM)
+				*diminui = 0;
+		}
+	}
+}
+
+void antecessor(Pagina* pag_atual, int indicie, Pagina* pag_pai, int* diminui){
+	if(pag_pai->apontador[pag_pai->n] != NULL)
+	{
+		antecessor(pag_atual, indicie, pag_pai->apontador[pag_pai->n], diminui);
+		if(*diminui == 1)
+			reconstitui(pag_pai->apontador[pag_pai->n], pag_pai, (long) pag_pai->n, diminui);
+		return;
+	}
+	pag_atual->registro[indicie - 1] = pag_pai->registro[pag_pai->n - 1];
+	pag_pai->n = pag_pai->n - 1;
+	*diminui = (pag_pai->n < ORDEM);
+}
+
+
+void ret(long int chave, Pagina* pag_atual, int* diminui){
+	long int j;
+	long int indicie = 1;
+	Pagina* pag_aux = NULL; 
+	if(pag_atual == NULL)
+	{
+		printf("ERRO: o registro de chave %ld nao esta na arvore!\n", chave);
+		*diminui = 0;
+		return;
+	}
+	pag_aux = pag_atual;
+
+	while((indicie < pag_aux->n) && (chave > pag_aux->registro[indicie - 1].chave)) // encontrando aode poderia estar o registro 
+		indicie++;
+
+	if(chave == pag_aux->registro[indicie - 1].chave) // se a chave foi encotrada na pag_aux
+	{
+		if(pag_aux->apontador[indicie - 1] == NULL) //se for pag_aux uma pagina folha
+		{
+			pag_aux->n = pag_aux->n - 1;
+			*diminui = (pag_aux->n < ORDEM); // se a pagina ficar com menos registros que o permitido diminui tera valor verdadeiro
+			for(j = indicie; j < pag_aux->n; j++) // arredando os registros e apontadores para o lado para ocupar o espaco do que sera retirado
+			{
+				pag_aux->registro[j - 1] = pag_aux->registro[j];
+				pag_aux->apontador[j] = pag_aux->apontador[j + 1];
+			}
+			return;
+		}
+		// se pag_aux nao for pagina folha
+		antecessor(pag_atual, indicie, pag_aux->apontador[indicie - 1], diminui); //encontrando o antecessor do registro que sera retirado
+
+		if(*diminui == 1) //se alguma pagina foi violada
+		{
+			reconstitui(pag_aux->apontador[indicie - 1], pag_atual, indicie - 1, diminui); //reconstruindo a arvore
+			return;
+		}
+	}
+	// se a a chave nao se encontra na pag_aux
+
+	if(chave > pag_aux->registro[indicie - 1].chave)
+		indicie++;
+	ret(chave, pag_aux->apontador[indicie - 1], diminui); // chamando novamente a funçao recursivamente
+
+	if(*diminui == 1)
+		reconstitui(pag_aux->apontador[indicie - 1], pag_atual, indicie - 1, diminui);
+}
+
+void retira(long int chave, Pagina* pag_atual){
+	int diminui;
+	Pagina* pag_aux = NULL;
+	ret(chave, pag_atual, &diminui);
+
+	if(diminui && (pag_atual->n == 0)) //arvore diminui na altura
+	{
+		pag_aux = pag_atual;
+		pag_atual = pag_aux->apontador[0];
+		free(pag_aux);
+	}
+}

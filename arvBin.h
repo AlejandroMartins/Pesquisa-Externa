@@ -9,13 +9,13 @@ typedef struct no_arv No_arv;
 
 
 // Função para criar um novo nó
-TreeNode* criar_no(int);
+No_arv* criar_no(int);
 
 // Função para escrever um nó no arquivo
-void escrever_no(FILE*, TreeNode*, long);
+void escrever_no(FILE*, No_arv*, long);
 
 // Função para ler um nó do arquivo
-TreeNode* ler_no(FILE* arquivo, long pos);
+No_arv* ler_no(FILE* arquivo, long pos);
 
 // Função para inserir uma chave na árvore
 long inserir(FILE*, int, long);
