@@ -21,4 +21,4 @@ No_arv* ler_no(FILE* arquivo, long pos);
 long inserir(FILE*, int, long);
 
 // Função para buscar uma chave na árvore
-bool buscar(FILE*, int, long);
+bool buscar(FILE*, int, long, No_arv*);
