@@ -1,6 +1,6 @@
 // src/dataGenerator.c
 // para compilar: gcc -o dataGenerator.exe dataGenerator.c src/utils.c -Isrc/include -std=c99
-// para executar ./src/dataGenerator.exe
+// para executar ./dataGenerator.exe
 
 #include <stdio.h>   // Para FILE, fopen, fclose, printf, perror
 #include <stdlib.h>  // Para malloc, free, rand, srand, qsort, exit, EXIT_FAILURE
@@ -14,7 +14,9 @@ TipoRegistro gerarRegistroAleatorio(TipoChave chave) {
     TipoRegistro reg;
     reg.Chave = chave;
     reg.dado1 = rand() * 1000L; // Gera um long int aleatório
-    sprintf(reg.dado2, "Dado2_chave_%ld_aleatorio_%d", chave, rand() % 1000); // String aleatória curta
+    // Preenche dado2 com caracteres aleatórios e termina com '\0' para ter 1000 caracteres
+    memset(reg.dado2, 'A' + (rand() % 26), 999);
+    reg.dado2[999] = '\0'; // Garante terminação de string
     // Preenche dado3 com caracteres aleatórios e termina com '\0' para ter 5000 caracteres
     memset(reg.dado3, 'A' + (rand() % 26), 4999);
     reg.dado3[4999] = '\0'; // Garante terminação de string
@@ -46,7 +48,7 @@ int compararDescendente(const void *a, const void *b) {
  * @param situacao A situação de ordem (1: ascendente, 2: descendente, 3: aleatória). 
  */
 void gerarArquivoDados(const char *filename, long quantidade, int situacao) {
-    FILE *file = fopen(filename, "wb"); // Abre o arquivo em modo binário de escrita
+    FILE *file = fopen(filename, "wb"); // Cria o arquivo em modo binário de escrita
     if (file == NULL) {
         perror("Erro ao criar o arquivo de dados"); // Reporta erro de abertura
         return;
@@ -88,7 +90,8 @@ void gerarArquivoDados(const char *filename, long quantidade, int situacao) {
         // Depois de embaralhar as chaves e a ordem, re-gera os dados de string para as novas chaves
         // Isso garante que dado2 e dado3 correspondam à chave final do registro.
         for (long i = 0; i < quantidade; i++) {
-            sprintf(registros[i].dado2, "Dado2_chave_%ld_aleatorio_%d", registros[i].Chave, rand() % 1000);
+            memset(registros[i].dado2, 'A' + (rand() % 26), 999);
+            registros[i].dado2[999] = '\0';
             memset(registros[i].dado3, 'A' + (rand() % 26), 4999);
             registros[i].dado3[4999] = '\0';
         }
