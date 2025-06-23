@@ -35,7 +35,7 @@ int main(int argc, char *argv[]) {
 
     if (argc < 5) {
         fprintf(stderr, "Uso: %s <metodo> <quantidade> <situacao> <chave> [-P]\n", argv[0]);
-        fprintf(stderr, "  <metodo>: 1=Sequencial Indexadoa, 2=Arvore Binaria Externa, 3=Arvore B, 4=Arvore B*\n");
+        fprintf(stderr, "  <metodo>: 1=Sequencial Indexado, 2=Arvore Binaria Externa, 3=Arvore B, 4=Arvore B*\n");
         fprintf(stderr, "  <quantidade>: 100, 1000, 10000, 100000, 1000000\n");
         fprintf(stderr, "  <situacao>: 1=Ascendente, 2=Descendente, 3=Aleatoria\n");
         fprintf(stderr, "  <chave>: Chave a ser pesquisada\n");
