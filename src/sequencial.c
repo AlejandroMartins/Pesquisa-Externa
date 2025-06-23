@@ -38,7 +38,7 @@ Indicie_p* criar_indicie_pagina(FILE* arq, int tam_arq, int tam_pag){
 bool pesquisa_sequencial(Indicie_p* ind_pagina, int tam_pag, int tam_ind, Item_arq* item, FILE* arq, int situacao_ordem){
 	Item_arq* pagina = criar_item_arq(tam_pag);
 
-	int indice_do_bloco_no_indice = -1; // Inicializa com -1 para indicar que não achou
+	int indice_do_bloco_no_indice = -2; // Inicializa com -2 para indicar que não achou
     
     // Lógica de busca no índice baseada na situação de ordem
     if (situacao_ordem == 1) { // Ordem Ascendente
@@ -49,11 +49,12 @@ bool pesquisa_sequencial(Indicie_p* ind_pagina, int tam_pag, int tam_ind, Item_a
                 break;
             }
         }
-        if (indice_do_bloco_no_indice == -1) { // Se o loop terminou sem break, chave é maior que todos os índices ou está na última página
+        if (indice_do_bloco_no_indice == -2) { 
+            // Se o loop terminou sem break, chave é maior que todos os índices ou está na última página
             indice_do_bloco_no_indice = tam_ind - 1; // Ultima página
         }
 
-        if (indice_do_bloco_no_indice < 0) { // Chave menor que a primeira do índice (não existe antes dela)
+        if (indice_do_bloco_no_indice == -1) { // Chave menor que a primeira do índice (não existe antes dela)
             free(pagina);
             return false;
         }
@@ -63,16 +64,41 @@ bool pesquisa_sequencial(Indicie_p* ind_pagina, int tam_pag, int tam_ind, Item_a
         // A chave desejada estará nessa página (se for igual) ou na página seguinte.
         for(int i = 0; i < tam_ind; i++) {
             incrementar_comparacao();
-            if(item->Chave >= ind_pagina[i].chave) { // Se a chave de busca é MAIOR OU IGUAL à chave do índice
-                indice_do_bloco_no_indice = i; // A chave pode estar nesta página ou na próxima
+            if(item->Chave > ind_pagina[i].chave) { // Se a chave de busca é MAIOR à chave do índice
+                indice_do_bloco_no_indice = i-1; // A chave pode estar na página anterior
                 break;
             }
         }
-        if (indice_do_bloco_no_indice == -1) { // Se o loop terminou sem break, significa que a chave é menor que a última chave do índice
-                                              // (e não existe depois dela). Ou o arquivo é vazio.
-            free(pagina);
-            return false; // Chave menor que a última do índice, não encontrada
+
+        // if (indice_do_bloco_no_indice == -2) { // Se o loop terminou sem break, significa que a chave é menor que a última chave do índice
+        //                                       // (e não existe depois dela). Ou o arquivo é vazio.
+        //     free(pagina);
+        //     return false; // Chave menor que a última do índice, não encontrada
+        // }
+
+        if (indice_do_bloco_no_indice == -2) {
+            // Chave pode estar na última página ou é menor que a última chave
+
+            // Para achar a última chave
+            long current_file_pos_temp = ftell(arq);
+
+            fseek(arq, sizeof(Item_arq), SEEK_END);
+            
+            Item_arq ultimo_reg;
+            fread(ultimo_reg, sizeof(Item_arq), 1, arq);
+
+            fseek(arq, current_file_pos_temp, SEEK_SET);
+            
+            if(item->Chave <= ind_pagina[tam_ind-1].chave && item->Chave >= ultimo_reg.Chave) {
+                // Chave pode estar na última página
+                indice_do_bloco_no_indice = tam_ind-1;
+            }else{
+                // Chave é menor que a última chave da última página ou o arquivo é vazio
+                free(pagina);
+                return false;
+            }
         }
+        
         // Nenhuma ação extra para indice_do_bloco_no_indice após o loop, ele já aponta para o bloco correto
 
     } else { // Ordem Aleatória (situacao_ordem == 3)
@@ -87,6 +113,7 @@ bool pesquisa_sequencial(Indicie_p* ind_pagina, int tam_pag, int tam_ind, Item_a
         // mas a performance será afetada, pois a "magia" do índice por ordenação se perde.
         // Para uma busca que "encontre", teríamos que ler *todas* as páginas e verificar, o que não é o ponto da busca indexada.
         // Vou deixar a lógica como se fosse ascendente, mas com o aviso.
+
         for(int i = 0; i < tam_ind; i++) {
             incrementar_comparacao();
             if(item->Chave < ind_pagina[i].chave) {
@@ -94,10 +121,10 @@ bool pesquisa_sequencial(Indicie_p* ind_pagina, int tam_pag, int tam_ind, Item_a
                 break;
             }
         }
-        if (indice_do_bloco_no_indice == -1) {
+        if (indice_do_bloco_no_indice == -2) { 
             indice_do_bloco_no_indice = tam_ind - 1;
         }
-        if (indice_do_bloco_no_indice < 0) {
+        if (indice_do_bloco_no_indice == -1) {
             free(pagina);
             return false;
         }
@@ -128,21 +155,40 @@ bool pesquisa_sequencial(Indicie_p* ind_pagina, int tam_pag, int tam_ind, Item_a
 	fread(pagina, sizeof(Item_arq), quantidade_de_itens_na_pagina_lida, arq); // Lendo a quantidade correta.
 	incrementar_io();
 
-	for( int j = 0; j < quantidade_de_itens_na_pagina_lida; j++)
-	{
-		incrementar_comparacao();
-		if((item->Chave) < pagina[j].Chave)
+    if (situacao_ordem == 2) { // Ordem Descendente
+        for( int j = 0; j < quantidade_de_itens_na_pagina_lida; j++)
         {
-            free(pagina);
-			return false;
+            incrementar_comparacao();
+            if((item->Chave) > pagina[j].Chave)
+            {
+                free(pagina);
+                return false;
+            }
+            if((item->Chave) == (pagina[j].Chave))
+            {
+                *item = pagina[j];
+                free(pagina);
+                return true;
+            }
         }
-		if((item->Chave) == (pagina[j].Chave))
-		{
-			*item = pagina[j];
-            free(pagina);
-			return true;
-		}
-	}
+    } else {// Ordem Ascendente e aleatória
+        for( int j = 0; j < quantidade_de_itens_na_pagina_lida; j++)
+        {
+            incrementar_comparacao();
+            if((item->Chave) < pagina[j].Chave)
+            {
+                free(pagina);
+                return false;
+            }
+            if((item->Chave) == (pagina[j].Chave))
+            {
+                *item = pagina[j];
+                free(pagina);
+                return true;
+            }
+        }
+    }
+
     free(pagina);
 	return false;
 }
