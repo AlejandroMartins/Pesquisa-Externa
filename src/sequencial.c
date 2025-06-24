@@ -85,7 +85,7 @@ bool pesquisa_sequencial(Indicie_p* ind_pagina, int tam_pag, int tam_ind, Item_a
             fseek(arq, sizeof(Item_arq), SEEK_END);
             
             Item_arq ultimo_reg;
-            fread(ultimo_reg, sizeof(Item_arq), 1, arq);
+            fread(&ultimo_reg, sizeof(Item_arq), 1, arq);
 
             fseek(arq, current_file_pos_temp, SEEK_SET);
             
