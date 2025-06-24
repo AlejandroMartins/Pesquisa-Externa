@@ -121,9 +121,9 @@ int main(int argc, char *argv[]) {
         }
 
         case 2: { // 2: Árvore Binária de Pesquisa adequada à memória externa
-            FILE* arv_bin_file = fopen("arvore_binaria_externa.dat", "r+b");
+            FILE* arv_bin_file = fopen("temp/arvore_binaria_externa.dat", "r+b");
             if (!arv_bin_file) {
-                arv_bin_file = fopen("arvore_binaria_externa.dat", "w+b");
+                arv_bin_file = fopen("temp/arvore_binaria_externa.dat", "w+b");
                 if (!arv_bin_file) {
                     perror("Erro ao criar/abrir arquivo da Arvore Binaria Externa");
                     fclose(arquivo_dados);
