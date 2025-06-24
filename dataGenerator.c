@@ -2,10 +2,10 @@
 // para compilar: gcc -o dataGenerator.exe dataGenerator.c src/utils.c -Isrc/include -std=c99
 // para executar ./dataGenerator.exe
 
-#include <stdio.h>   // Para FILE, fopen, fclose, printf, perror
-#include <stdlib.h>  // Para malloc, free, rand, srand, qsort, exit, EXIT_FAILURE
-#include <time.h>    // Para time (para srand)
-#include <string.h>  // Para sprintf, memset
+#include <stdio.h>    // Para FILE, fopen, fclose, printf, perror
+#include <stdlib.h>   // Para malloc, free, rand, srand, qsort, exit, EXIT_FAILURE
+#include <time.h>     // Para time (para srand)
+#include <string.h>   // Para sprintf, memset
 
 #include "./src/include/common_types.h" // Inclui TipoRegistro e TipoChave
 
@@ -45,7 +45,7 @@ int compararDescendente(const void *a, const void *b) {
  * @brief Gera um arquivo binário de registros com a quantidade e ordem especificadas.
  * @param filename O nome do arquivo a ser criado (incluindo o caminho da pasta de saída).
  * @param quantidade O número de registros a serem gerados.
- * @param situacao A situação de ordem (1: ascendente, 2: descendente, 3: aleatória). 
+ * @param situacao A situação de ordem (1: ascendente, 2: descendente, 3: aleatória).
  */
 void gerarArquivoDados(const char *filename, long quantidade, int situacao) {
     FILE *file = fopen(filename, "wb"); // Cria o arquivo em modo binário de escrita
@@ -64,36 +64,23 @@ void gerarArquivoDados(const char *filename, long quantidade, int situacao) {
 
     srand(time(NULL)); // Inicializa o gerador de números aleatórios com o tempo atual
 
-    // Geração inicial dos registros com chaves sequenciais (para facilitar a ordenação)
+    // Geração inicial das chaves sequenciais e dados aleatórios para todos os registros
     for (long i = 0; i < quantidade; i++) {
-        registros[i] = gerarRegistroAleatorio(i + 1); // Chaves de 1 a 'quantidade'
+        registros[i] = gerarRegistroAleatorio(i + 1); // Chaves de 1 a 'quantidade', inicialmente
     }
 
     // Aplica a ordenação conforme a situação especificada
-    if (situacao == 1) { // Ordem ascendente
+    if (situacao == 1) { // Ordem ascendente (já está, mas qsort garante)
         qsort(registros, quantidade, sizeof(TipoRegistro), compararAscendente);
     } else if (situacao == 2) { // Ordem descendente
         qsort(registros, quantidade, sizeof(TipoRegistro), compararDescendente);
     } else { // Ordem aleatória
-        // Para uma ordem realmente aleatória das chaves, primeiro geramos chaves aleatórias
-        for (long i = 0; i < quantidade; i++) {
-            // Gera chaves aleatórias em um range um pouco maior para reduzir colisões
-            registros[i].Chave = (TipoChave)(rand() % (quantidade * 5) + 1);
-        }
-        // Em seguida, embaralha o array para garantir a desordem aleatória dos registros completos
-        for (long i = 0; i < quantidade - 1; i++) {
-            long j = i + (rand() % (quantidade - i)); // Escolhe um índice aleatório à frente
+        // Embaralha o array de registros para obter uma ordem aleatória das chaves
+        for (long i = quantidade - 1; i > 0; i--) {
+            long j = rand() % (i + 1); // Escolhe um índice aleatório
             TipoRegistro temp = registros[i]; // Troca os registros
             registros[i] = registros[j];
             registros[j] = temp;
-        }
-        // Depois de embaralhar as chaves e a ordem, re-gera os dados de string para as novas chaves
-        // Isso garante que dado2 e dado3 correspondam à chave final do registro.
-        for (long i = 0; i < quantidade; i++) {
-            memset(registros[i].dado2, 'A' + (rand() % 26), 999);
-            registros[i].dado2[999] = '\0';
-            memset(registros[i].dado3, 'A' + (rand() % 26), 4999);
-            registros[i].dado3[4999] = '\0';
         }
     }
 
@@ -109,8 +96,8 @@ int main(int argc, char *argv[]) {
     printf("--- Geracao de Arquivos de Dados para o TP01 ---\n");
 
     // Arrays predefinidos de quantidades de registros e situações de ordem
-    long quantidades[] = {100, 1000, 10000, 100000, 1000000};
-    int situacoes[] = {1, 2, 3}; // 1: ascendente, 2: descendente, 3: aleatoria 
+    long quantidades[] = {100, 1000, 10000, 100000};
+    int situacoes[] = {1,2,3}; // 1: ascendente, 2: descendente, 3: aleatoria
     char filename[256]; // Buffer para armazenar o nome do arquivo
 
     // Loops aninhados para gerar arquivos para todas as combinações de quantidade e situação
