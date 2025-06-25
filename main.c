@@ -170,7 +170,8 @@ int main(int argc, char *argv[]) {
         }
 
         case 3: { // 3: Árvore B
-            Pagina* arvoreB_raiz = NULL;
+            int ordem = calcula_ordem(quantidade_registros);
+            Pagina* arvoreB_raiz;
             // CHAMADA CORRIGIDA: usa inicializa_arvoreB (nome renomeado) e passa &arvoreB_raiz
             inicializa_arvoreB(&arvoreB_raiz); 
 
@@ -183,7 +184,7 @@ int main(int argc, char *argv[]) {
             while(fread(&temp_reg_b, sizeof(TipoRegistro), 1, arquivo_dados) == 1) {
                 incrementar_io();
                 // CHAMADA CORRIGIDA: usa insere_arvoreB (nome renomeado) e passa &arvoreB_raiz
-                insere_arvoreB(temp_reg_b, &arvoreB_raiz);
+                insere_arvoreB(temp_reg_b, &arvoreB_raiz, ordem);
             }
             tempo_execucao_construcao_indice = finalizar_tempo(inicio_tempo_geral);
             printf("Tempo de construcao do indice: %.6f segundos\n", tempo_execucao_construcao_indice);

@@ -18,4 +18,7 @@ void incrementar_comparacao();
 clock_t iniciar_tempo();
 double finalizar_tempo(clock_t inicio);
 
+// Função para calcular a ordem das árvores;
+int calcula_ordem(long);
+
 #endif // UTILS_H
