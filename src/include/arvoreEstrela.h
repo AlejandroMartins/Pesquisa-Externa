@@ -87,4 +87,6 @@ void Imprime(TipoApontador arvore);
  */
 void liberaArvoreBStar(TipoApontador arvore);
 
+void ImprimeArvore(TipoApontador Ap, int nivel);
+
 #endif // ARVOREESTRELA_H

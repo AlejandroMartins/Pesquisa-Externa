@@ -96,7 +96,7 @@ int main(int argc, char *argv[]) {
     printf("--- Geracao de Arquivos de Dados para o TP01 ---\n");
 
     // Arrays predefinidos de quantidades de registros e situações de ordem
-    long quantidades[] = {100, 1000, 10000, 100000};
+    long quantidades[] = {100, 1000, 10000, 100000, 1000000};
     int situacoes[] = {1,2,3}; // 1: ascendente, 2: descendente, 3: aleatoria
     char filename[256]; // Buffer para armazenar o nome do arquivo
 
