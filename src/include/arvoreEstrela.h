@@ -12,8 +12,8 @@
 // Baseado no conceito de ordem m, onde 2m é o máximo.
 // Se a ordem m da Árvore B for 2, então MM = 2m = 4.
 // Para Árvore B*, MM2 (para folhas) pode ser maior que MM (para nós internos).
-// MM Capacidade máxima de chaves em uma página interna (2m)
-// MM2 Capacidade máxima de registros em uma página folha (2m' onde m' é ordem da folha)
+#define MM 4    // Ex: Capacidade máxima de chaves em uma página interna (2m)
+#define MM2 10  // Ex: Capacidade máxima de registros em uma página folha (2m' onde m' é ordem da folha)
 
 // Tipo para identificar se a página é interna ou externa 
 typedef enum {Interna, Externa} TipoIntExt;
@@ -31,13 +31,13 @@ struct TipoPagina {
         // Estrutura para páginas internas (nós de índice)
         struct {
             int ni;                     // Número de itens (chaves) na página interna 
-            TipoChave *ri;              // Chaves MM
-            TipoApontador *pi;          // Apontadores para subárvores MM + 1
+            TipoChave ri[MM];           // Chaves 
+            TipoApontador pi[MM + 1];   // Apontadores para subárvores 
         } U0;
         // Estrutura para páginas externas (folhas)
         struct {
             int ne;                     // Número de registros na página externa 
-            TipoRegistro *re;           // Registros completos MM2
+            TipoRegistro re[MM2];       // Registros completos 
         } U1;
     } UU; // União para armazenar a estrutura de página interna ou externa 
 };
@@ -66,14 +66,14 @@ void Pesquisa(TipoRegistro *x, TipoApontador *Ap);
  * @param Reg O registro a ser inserido.
  * @param Ap Ponteiro para o apontador da raiz da árvore.
  */
-void Insere(TipoRegistro Reg, TipoApontador *Ap, int mm, int mm2);
+void Insere(TipoRegistro Reg, TipoApontador *Ap);
 
 /**
  * @brief Remove um registro da árvore B*.
  * @param Ch A chave do registro a ser removido.
  * @param Ap Ponteiro para o apontador da raiz da árvore.
  */
-// void Retira(TipoChave Ch, TipoApontador *Ap);
+void Retira(TipoChave Ch, TipoApontador *Ap);
 
 /**
  * @brief Imprime as chaves da árvore em ordem (para depuração).

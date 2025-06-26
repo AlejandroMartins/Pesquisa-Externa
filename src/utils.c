@@ -29,11 +29,3 @@ double finalizar_tempo(clock_t inicio) {
 int calcula_ordem(long q) {
     return q * 0.05;
 }
-
-int calcula_mm(int m) {
-    return (2 * m) / 3;
-}
-
-int calcula_mm2(int m) {
-    return 2 * m;
-}

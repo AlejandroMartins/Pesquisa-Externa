@@ -203,9 +203,6 @@ int main(int argc, char *argv[]) {
         }
 
         case 4: { // 4: Árvore B*
-            int mm = calcula_mm(calcula_ordem(quantidade_registros));
-            int mm2 = calcula_mm2(calcula_ordem(quantidade_registros));
-            
             TipoApontador arvoreBStar_raiz = NULL;
             // CHAMADA ORIGINAL: Inicializa (nome original da B*)
             Inicializa(&arvoreBStar_raiz); 
@@ -218,7 +215,7 @@ int main(int argc, char *argv[]) {
             fseek(arquivo_dados, 0, SEEK_SET);
             while(fread(&temp_reg_bstar, sizeof(TipoRegistro), 1, arquivo_dados) == 1) {
                 incrementar_io();
-                Insere(temp_reg_bstar, &arvoreBStar_raiz, mm, mm2); // Insere espera TipoRegistro e TipoApontador*
+                Insere(temp_reg_bstar, &arvoreBStar_raiz); // Insere espera TipoRegistro e TipoApontador*
             }
             tempo_execucao_construcao_indice = finalizar_tempo(inicio_tempo_geral);
             printf("Tempo de construcao do indice: %.6f segundos\n", tempo_execucao_construcao_indice);
