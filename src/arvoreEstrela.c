@@ -15,9 +15,7 @@
 #define Externa 1
 #define TRUE 1
 #define FALSE 0
-// -----------------------------------------------------------------------------
-// Implementação das funções auxiliares (static) - Baseadas no PDF e adaptadas
-// -----------------------------------------------------------------------------
+
 typedef struct {
     short Cresceu;
     int NumChavesPromovidas;
@@ -50,12 +48,8 @@ TipoApontador CriaPagina(int tipo) {
  * @param RegRetorno Registro cuja chave será promovida ao nível superior (se houver split).
  * @param ApRetorno Apontador para a nova página criada (se houver split).
  */
-// SUBSTITUA A SUA FUNÇÃO 'Ins' ATUAL POR ESTA VERSÃO DE DEPURAÇÃO
 
-// Declaração antecipada para a função recursiva (se ainda não tiver)
 static ResultadoIns Ins(TipoRegistro Reg, TipoApontador Ap, TipoApontador Pai, int PosFilho);
-
-// ... (suas outras funções como Inicializa, etc.)
 
 ResultadoIns Ins(TipoRegistro Reg, TipoApontador Ap, TipoApontador Pai, int PosFilho) {
     ResultadoIns resultado;
@@ -412,12 +406,6 @@ void ImprimeArvore(TipoApontador Ap, int nivel) {
     }
 }
 
-
-
-// -----------------------------------------------------------------------------
-// Implementação das funções públicas da Árvore B*
-// -----------------------------------------------------------------------------
-
 /**
  * @brief Inicializa a árvore B* definindo sua raiz como NULL.
  * @param Arvore Ponteiro para o apontador da raiz da árvore.
@@ -521,30 +509,6 @@ void Insere(TipoRegistro Reg, TipoApontador *Ap) {
     }
 }
 
-
-/**
- * @brief Remove um registro da árvore B*.
- * @param Ch A chave do registro a ser removido.
- * @param Ap Ponteiro para o apontador da raiz da árvore.
- */
-// Funções de Remoção (static para auxiliares, pois não estão no PDF de base)
-static void Ret(TipoChave Ch, TipoApontador *Ap, bool *Diminuiu);
-static void Reconstitui(TipoApontador ApPag, TipoApontador ApPai, int PosPai, bool *Diminuiu);
-
-void Retira(TipoChave Ch, TipoApontador *Ap) {
-    bool Diminuiu;
-    TipoApontador Aux;
-
-    Ret(Ch, Ap, &Diminuiu);
-
-    // Se a árvore diminuiu em altura pela raiz (raiz ficou vazia)
-    if (Diminuiu && (*Ap)->UU.U0.ni == 0 && (*Ap)->Pt == Interna) {
-        Aux = *Ap;
-        *Ap = Aux->UU.U0.pi[0]; // A nova raiz é o primeiro filho da antiga raiz
-        free(Aux); // Libera a antiga raiz
-    }
-}
-
 /**
  * @brief Imprime as chaves da árvore em ordem (para depuração).
  * @param arvore Apontador para a página atual (começa pela raiz).
@@ -584,224 +548,4 @@ void liberaArvoreBStar(TipoApontador arvore) {
         }
     }
     free(arvore); // Libera a própria página
-}
-
-// -----------------------------------------------------------------------------
-// Implementação das funções de Remoção (Baseadas na última versão que te dei, corrigidas para serem estáticas e completas)
-// -----------------------------------------------------------------------------
-
-static void Reconstitui(TipoApontador ApPag, TipoApontador ApPai, int PosPai, bool *Diminuiu) {
-    TipoApontador Aux;
-    long DispAux, j;
-
-    incrementar_io(); // Acesso à página atual
-    incrementar_io(); // Acesso à página pai
-
-    if (PosPai < ApPai->UU.U0.ni) { // Aux = TipoPagina a direita de ApPag
-        Aux = ApPai->UU.U0.pi[PosPai + 1];
-        incrementar_io();
-
-        if (ApPag->Pt == Interna) {
-            DispAux = (Aux->UU.U0.ni - MM / 2);
-            if (DispAux > 0) {
-                ApPag->UU.U0.ri[ApPag->UU.U0.ni] = ApPai->UU.U0.ri[PosPai];
-                ApPag->UU.U0.pi[ApPag->UU.U0.ni + 1] = Aux->UU.U0.pi[0];
-                ApPag->UU.U0.ni++;
-
-                ApPai->UU.U0.ri[PosPai] = Aux->UU.U0.ri[0];
-                
-                for (j = 0; j < Aux->UU.U0.ni - 1; j++) {
-                    Aux->UU.U0.ri[j] = Aux->UU.U0.ri[j + 1];
-                }
-                for (j = 0; j <= Aux->UU.U0.ni - 1; j++) { // Usar Aux->UU.U0.ni no loop
-                    Aux->UU.U0.pi[j] = Aux->UU.U0.pi[j + 1]; // Corrigido p/ +1
-                }
-                Aux->UU.U0.ni--;
-                *Diminuiu = false;
-            } else {
-                ApPag->UU.U0.ri[ApPag->UU.U0.ni] = ApPai->UU.U0.ri[PosPai];
-                ApPag->UU.U0.pi[ApPag->UU.U0.ni + 1] = Aux->UU.U0.pi[0];
-                ApPag->UU.U0.ni++;
-
-                for (j = 0; j < Aux->UU.U0.ni; j++) {
-                    ApPag->UU.U0.ri[ApPag->UU.U0.ni++] = Aux->UU.U0.ri[j];
-                    ApPag->UU.U0.pi[ApPag->UU.U0.ni] = Aux->UU.U0.pi[j + 1];
-                }
-                free(Aux);
-
-                for (j = PosPai + 1; j < ApPai->UU.U0.ni; j++) {
-                    ApPai->UU.U0.ri[j - 1] = ApPai->UU.U0.ri[j];
-                    ApPai->UU.U0.pi[j] = ApPai->UU.U0.pi[j + 1];
-                }
-                ApPai->UU.U0.ni--;
-                *Diminuiu = (ApPai->UU.U0.ni < MM / 2);
-            }
-        } else { // Reconstituição de página externa (folha)
-            DispAux = (Aux->UU.U1.ne - MM2 / 2);
-            if (DispAux > 0) {
-                for (j = 0; j < DispAux; j++) {
-                    ApPag->UU.U1.re[ApPag->UU.U1.ne++] = Aux->UU.U1.re[j];
-                }
-                ApPai->UU.U0.ri[PosPai] = Aux->UU.U1.re[DispAux].Chave;
-                
-                for (j = 0; j < Aux->UU.U1.ne - DispAux; j++) {
-                    Aux->UU.U1.re[j] = Aux->UU.U1.re[j + DispAux];
-                }
-                Aux->UU.U1.ne -= DispAux;
-                *Diminuiu = false;
-            } else {
-                for (j = 0; j < Aux->UU.U1.ne; j++) {
-                    ApPag->UU.U1.re[ApPag->UU.U1.ne++] = Aux->UU.U1.re[j];
-                }
-                free(Aux);
-
-                for (j = PosPai + 1; j < ApPai->UU.U0.ni; j++) {
-                    ApPai->UU.U0.ri[j - 1] = ApPai->UU.U0.ri[j];
-                    ApPai->UU.U0.pi[j] = ApPai->UU.U0.pi[j + 1];
-                }
-                ApPai->UU.U0.ni--;
-                *Diminuiu = (ApPai->UU.U0.ni < MM / 2);
-            }
-        }
-
-    } else { // Aux = TipoPagina a esquerda de ApPag
-        Aux = ApPai->UU.U0.pi[PosPai - 1];
-        incrementar_io();
-
-        if (ApPag->Pt == Interna) {
-            DispAux = (Aux->UU.U0.ni - MM / 2);
-            if (DispAux > 0) {
-                for (j = ApPag->UU.U0.ni; j >= 0; j--) {
-                    ApPag->UU.U0.ri[j] = ApPag->UU.U0.ri[j - 1];
-                }
-                for (j = ApPag->UU.U0.ni + 1; j >= 0; j--) {
-                    ApPag->UU.U0.pi[j] = ApPag->UU.U0.pi[j - 1];
-                }
-                ApPag->UU.U0.ni++;
-
-                ApPag->UU.U0.ri[0] = ApPai->UU.U0.ri[PosPai - 1];
-                ApPag->UU.U0.pi[0] = Aux->UU.U0.pi[Aux->UU.U0.ni];
-
-                ApPai->UU.U0.ri[PosPai - 1] = Aux->UU.U0.ri[Aux->UU.U0.ni - 1];
-                Aux->UU.U0.ni--;
-                *Diminuiu = false;
-            } else {
-                Aux->UU.U0.ri[Aux->UU.U0.ni] = ApPai->UU.U0.ri[PosPai - 1];
-                Aux->UU.U0.pi[Aux->UU.U0.ni + 1] = ApPag->UU.U0.pi[0];
-                Aux->UU.U0.ni++;
-
-                for (j = 0; j < ApPag->UU.U0.ni; j++) {
-                    Aux->UU.U0.ri[Aux->UU.U0.ni++] = ApPag->UU.U0.ri[j];
-                    Aux->UU.U0.pi[Aux->UU.U0.ni] = Aux->UU.U0.pi[j + 1];
-                }
-                free(ApPag);
-                for (j = PosPai; j < ApPai->UU.U0.ni; j++) {
-                    ApPai->UU.U0.ri[j - 1] = ApPai->UU.U0.ri[j];
-                    ApPai->UU.U0.pi[j] = ApPai->UU.U0.pi[j + 1];
-                }
-                ApPai->UU.U0.ni--;
-                *Diminuiu = (ApPai->UU.U0.ni < MM / 2);
-            }
-        } else {
-            DispAux = (Aux->UU.U1.ne - MM2 / 2);
-            if (DispAux > 0) {
-                for (j = ApPag->UU.U1.ne; j >= 0; j--) {
-                    ApPag->UU.U1.re[j] = ApPag->UU.U1.re[j - 1];
-                }
-                ApPag->UU.U1.ne++;
-
-                ApPag->UU.U1.re[0] = Aux->UU.U1.re[Aux->UU.U1.ne - DispAux];
-                ApPai->UU.U0.ri[PosPai - 1] = ApPag->UU.U1.re[0].Chave;
-                Aux->UU.U1.ne -= DispAux;
-                *Diminuiu = false;
-            } else {
-                for (j = 0; j < Aux->UU.U1.ne; j++) {
-                    Aux->UU.U1.re[Aux->UU.U1.ne++] = Aux->UU.U1.re[j];
-                }
-                free(ApPag);
-                for (j = PosPai; j < ApPai->UU.U0.ni; j++) {
-                    ApPai->UU.U0.ri[j - 1] = ApPai->UU.U0.ri[j];
-                    ApPai->UU.U0.pi[j] = ApPai->UU.U0.pi[j + 1];
-                }
-                ApPai->UU.U0.ni--;
-                *Diminuiu = (ApPai->UU.U0.ni < MM / 2);
-            }
-        }
-    }
-}
-
-static void Ret(TipoChave Ch, TipoApontador *Ap, bool *Diminuiu) {
-    long j, Ind = 1; // Ind é o índice de busca (1-based)
-    TipoApontador Pag;
-
-    Pag = *Ap; // Página atual na recursão
-
-    if (Pag == NULL) {
-        printf("Erro: registro com chave %ld nao esta na arvore\n", Ch);
-        *Diminuiu = false; // Não diminuiu (não havia nada para remover)
-        return;
-    }
-    incrementar_io(); // Conta o acesso à página
-
-    // Se a página é INTERNA (nó de índice)
-    if (Pag->Pt == Interna) {
-        // Encontra o índice da subárvore para descer
-        while (Ind < Pag->UU.U0.ni && Ch > Pag->UU.U0.ri[Ind - 1]) { // Usa 1-based 'Ind' e 'Ind-1' para array
-            incrementar_comparacao();
-            Ind++;
-        }
-        if (Pag->UU.U0.ni > 0) incrementar_comparacao(); // Última comparação do loop ou condição
-        
-        bool chave_exata_no_indice = (Ind <= Pag->UU.U0.ni && Ch == Pag->UU.U0.ri[Ind - 1]);
-
-        // Chamada recursiva para descer na árvore
-        if (chave_exata_no_indice) { // Se a chave está no nó interno (guia), desce pela direita
-            Ret(Ch, &Pag->UU.U0.pi[Ind], Diminuiu); // Continua a busca na subárvore à direita
-        } else { // Caso contrário, desce pela subárvore apropriada (esquerda ou direita)
-            if (Ch < Pag->UU.U0.ri[Ind - 1]) {
-                Ret(Ch, &Pag->UU.U0.pi[Ind - 1], Diminuiu); // Desce pela esquerda
-            } else {
-                Ret(Ch, &Pag->UU.U0.pi[Ind], Diminuiu); // Desce pela direita
-            }
-        }
-
-        // Se a subárvore retornou que diminuiu, precisa reconstituir
-        if (*Diminuiu) {
-            // Reconstitui a página filho que diminuiu
-            // O índice `Ind` ou `Ind-1` deve ser passado corretamente.
-            if (chave_exata_no_indice) { // Se a chave estava no índice e afetou o filho direito
-                 Reconstitui(Pag->UU.U0.pi[Ind], *Ap, Ind, Diminuiu);
-            } else { // Se a chave não estava no índice
-                if (Ch < Pag->UU.U0.ri[Ind - 1]) {
-                     Reconstitui(Pag->UU.U0.pi[Ind - 1], *Ap, Ind - 1, Diminuiu);
-                } else {
-                     Reconstitui(Pag->UU.U0.pi[Ind], *Ap, Ind, Diminuiu);
-                }
-            }
-        }
-        
-    } else { // Se a página é EXTERNA (folha)
-        // Encontra o registro a ser removido na folha
-        while (Ind < Pag->UU.U1.ne && Ch > Pag->UU.U1.re[Ind - 1].Chave) { // Usa 1-based 'Ind' e 'Ind-1' para array
-            incrementar_comparacao();
-            Ind++;
-        }
-        if (Pag->UU.U1.ne > 0) incrementar_comparacao(); // Última comparação do loop ou condição
-
-        // Se a chave foi encontrada na folha
-        if (Ind <= Pag->UU.U1.ne && Ch == Pag->UU.U1.re[Ind - 1].Chave) { // Verifica limite e igualdade
-            Pag->UU.U1.ne--; // Decrementa o número de registros
-            // Desloca os registros para preencher o espaço do removido
-            for (j = Ind - 1; j < Pag->UU.U1.ne; j++) {
-                Pag->UU.U1.re[j] = Pag->UU.U1.re[j + 1];
-            }
-            // Verifica se a propriedade 'm' foi violada (página ficou com menos do mínimo de itens)
-            *Diminuiu = (Pag->UU.U1.ne < (MM2 / 2));
-            return;
-        } else {
-            printf("Erro: Registro com chave %ld nao esta presente na arvore para remocao.\n", Ch);
-            *Diminuiu = false; // Não diminuiu (não removeu nada)
-            return;
-        }
-    }
 }

@@ -7,7 +7,7 @@
 
 typedef TipoRegistro Item_arq;
 
-#define ORDEM 2
+#define ORDEM 20
 
 typedef struct pagina{
 	int n;
@@ -20,11 +20,6 @@ void inicializa_arvoreB(Pagina**);
 void insere_na_pagina(Pagina*, Item_arq, Pagina*);
 void ins_arvoreB(Item_arq, Pagina*, bool*, Item_arq*, Pagina**);
 void insere_arvoreB(Item_arq, Pagina**);
-void reconstitui_arvoreB(Pagina*, Pagina*, int, bool*);
-// CORRIGIDO: Assinatura de antecessor_arvoreB para Item_arq* no primeiro parâmetro
-void antecessor_arvoreB(Item_arq*, int, Pagina*, bool*); 
-void ret_arvoreB(TipoChave, Pagina**, bool*);
-void retira_arvoreB(TipoChave, Pagina**);
 void libera_arvoreB(Pagina*);
 
 #endif

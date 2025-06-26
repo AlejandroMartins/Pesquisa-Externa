@@ -12,8 +12,8 @@
 // Baseado no conceito de ordem m, onde 2m é o máximo.
 // Se a ordem m da Árvore B for 2, então MM = 2m = 4.
 // Para Árvore B*, MM2 (para folhas) pode ser maior que MM (para nós internos).
-#define MM 4    // Ex: Capacidade máxima de chaves em uma página interna (2m)
-#define MM2 10  // Ex: Capacidade máxima de registros em uma página folha (2m' onde m' é ordem da folha)
+#define MM 12    // (M*2)/3, M=20 Ex: Capacidade máxima de chaves em uma página interna (2m)
+#define MM2 40  // M*2, M=20 Ex: Capacidade máxima de registros em uma página folha (2m' onde m' é ordem da folha)
 
 // Tipo para identificar se a página é interna ou externa 
 typedef enum {Interna, Externa} TipoIntExt;
@@ -42,11 +42,6 @@ struct TipoPagina {
     } UU; // União para armazenar a estrutura de página interna ou externa 
 };
 
-
-// -----------------------------------------------------------------------------
-// Declarações das funções da Árvore B* (públicas)
-// -----------------------------------------------------------------------------
-
 /**
  * @brief Inicializa a árvore B* definindo sua raiz como NULL.
  * @param Arvore Ponteiro para o apontador da raiz da árvore.
@@ -67,13 +62,6 @@ void Pesquisa(TipoRegistro *x, TipoApontador *Ap);
  * @param Ap Ponteiro para o apontador da raiz da árvore.
  */
 void Insere(TipoRegistro Reg, TipoApontador *Ap);
-
-/**
- * @brief Remove um registro da árvore B*.
- * @param Ch A chave do registro a ser removido.
- * @param Ap Ponteiro para o apontador da raiz da árvore.
- */
-void Retira(TipoChave Ch, TipoApontador *Ap);
 
 /**
  * @brief Imprime as chaves da árvore em ordem (para depuração).
