@@ -25,7 +25,3 @@ clock_t iniciar_tempo() {
 double finalizar_tempo(clock_t inicio) {
     return (double)(clock() - inicio) / CLOCKS_PER_SEC;
 }
-
-int calcula_ordem(long q) {
-    return q * 0.05;
-}
